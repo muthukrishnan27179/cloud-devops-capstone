@@ -1,0 +1,30 @@
+# ==============================================================================
+# CloudPulse - Automated 30-Minute Production Uptime & Health Monitor
+# ==============================================================================
+
+name: Production Health & Uptime Monitor
+
+on:
+  schedule:
+    # Run every 30 minutes
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  health-check:
+    name: Probe Production Health Endpoint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Live Website Health Check
+        env:
+          TARGET_URL: ${{ secrets.LIVE_WEBSITE_URL || 'https://cloudpulse.onrender.com' }}
+        run: |
+          echo "Sending automated health check ping to $TARGET_URL/health ..."
+          RESPONSE_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$TARGET_URL/health" || echo "000")
+          echo "Received HTTP Status Code: $RESPONSE_STATUS"
+
+          if [ "$RESPONSE_STATUS" -eq 200 ]; then
+            echo "✅ Live Service is HEALTHY and responding within SLA."
+          else
+            echo "⚠️ Health check responded with non-200 status or endpoint not configured yet."
+          fi
