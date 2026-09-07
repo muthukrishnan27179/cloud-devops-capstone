@@ -1,0 +1,5 @@
+aws_region              = "us-east-1"
+environment             = "production"
+vpc_cidr                = "10.0.0.0/16"
+docker_image            = "ghcr.io/muthukrishnan27179/cloudpulse-platform:latest"
+ecs_execution_role_arn  = "arn:aws:iam::123456789012:role/ecsTaskExecutionRole"
