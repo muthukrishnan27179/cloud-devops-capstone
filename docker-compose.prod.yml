@@ -1,0 +1,48 @@
+# ==============================================================================
+# CloudPulse - Production Hardened Docker Compose Configuration
+# Adds CPU/Memory Resource Limits and Security Tightening
+# ==============================================================================
+
+version: '3.8'
+
+services:
+  app:
+    restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+  db:
+    ports: [] # Secure: do not expose raw database port to public host in production
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1024M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+
+  prometheus:
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+
+  grafana:
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M

@@ -1,0 +1,41 @@
+# ==============================================================================
+# CloudPulse - Render Infrastructure Blueprint
+# 1-Click Zero-Friction Cloud Deployment (Web Service + Managed PostgreSQL)
+# ==============================================================================
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. CloudPulse Web Application Container
+  # ----------------------------------------------------------------------------
+  - type: web
+    name: cloudpulse-platform
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: APP_NAME
+        value: cloudpulse-devops-platform
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cloudpulse-postgres
+          property: connectionString
+
+# ------------------------------------------------------------------------------
+# 2. Managed PostgreSQL Database Instance
+# ------------------------------------------------------------------------------
+databases:
+  - name: cloudpulse-postgres
+    databaseName: cloudpulse_db
+    user: cloudpulse_user
+    plan: free
+    region: oregon
+    postgresMajorVersion: 16
