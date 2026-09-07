@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CloudPulse | Cloud & DevOps Capstone Platform</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-text">
+          <h2>CloudPulse</h2>
+          <span class="badge capstone-badge">Capstone 2026</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-item active" data-tab="tab-overview">
+          <span class="icon">📊</span> Overview & Telemetry
+        </button>
+        <button class="nav-item" data-tab="tab-services">
+          <span class="icon">☁️</span> Cloud Services
+        </button>
+        <button class="nav-item" data-tab="tab-incidents">
+          <span class="icon">🚨</span> Incident Command
+        </button>
+        <button class="nav-item" data-tab="tab-chaos">
+          <span class="icon">🧪</span> Chaos & Traffic Lab
+        </button>
+        <button class="nav-item" data-tab="tab-cicd">
+          <span class="icon">⚙️</span> CI/CD & Architecture
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="telemetry-pill">
+          <span class="pulse-dot"></span>
+          <span id="system-status-text">SYSTEM HEALTHY</span>
+        </div>
+        <div class="quick-links">
+          <a href="/metrics" target="_blank" class="quick-link">/metrics</a>
+          <a href="/health" target="_blank" class="quick-link">/health</a>
+          <a href="/ready" target="_blank" class="quick-link">/ready</a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Navigation Bar -->
+      <header class="top-bar">
+        <div class="top-bar-left">
+          <h1 id="page-title">Operational Telemetry & Observability</h1>
+          <p class="subtitle">Real-time RED metrics, container health, and cloud service state</p>
+        </div>
+        <div class="top-bar-right">
+          <div class="env-pill">
+            <span class="env-tag" id="env-tag">PRODUCTION</span>
+            <span class="version-tag" id="version-tag">v1.0.0</span>
+          </div>
+
+          <!-- Auth User Info / Login Button -->
+          <div class="user-auth-panel" id="auth-panel">
+            <div id="logged-out-view">
+              <button class="btn btn-secondary btn-sm" id="btn-open-login">Sign In / Demo</button>
+            </div>
+            <div id="logged-in-view" class="hidden">
+              <div class="user-chip">
+                <span class="user-avatar" id="user-avatar">AD</span>
+                <div class="user-meta">
+                  <span class="user-name" id="user-name">Admin User</span>
+                  <span class="user-role badge" id="user-role">ADMIN</span>
+                </div>
+              </div>
+              <button class="btn btn-outline btn-xs" id="btn-logout">Logout</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- TAB 1: OVERVIEW & TELEMETRY -->
+      <section id="tab-overview" class="tab-pane active">
+        <!-- Stat Cards (RED Method) -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">Request Rate</span>
+              <span class="stat-icon">📈</span>
+            </div>
+            <div class="stat-value" id="stat-request-rate">0 <span class="unit">req/sec</span></div>
+            <div class="stat-subtext text-success">Active HTTP traffic stream</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">Error Rate (5xx)</span>
+              <span class="stat-icon">⚠️</span>
+            </div>
+            <div class="stat-value" id="stat-error-rate">0.00 <span class="unit">%</span></div>
+            <div class="stat-subtext text-muted" id="stat-error-sub">SLO target: &lt; 0.1%</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">P95 Latency</span>
+              <span class="stat-icon">⏱️</span>
+            </div>
+            <div class="stat-value" id="stat-latency">24 <span class="unit">ms</span></div>
+            <div class="stat-subtext text-info">Measured via Histogram buckets</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <span class="stat-title">Active Incidents</span>
+              <span class="stat-icon">🚨</span>
+            </div>
+            <div class="stat-value text-warning" id="stat-active-incidents">0</div>
+            <div class="stat-subtext" id="stat-incident-sub">Managed PostgreSQL state</div>
+          </div>
+        </div>
+
+        <!-- Live Traffic Graph & Telemetry Gauges -->
+        <div class="chart-and-gauges-grid">
+          <div class="panel telemetry-chart-panel">
+            <div class="panel-header">
+              <h3>Real-Time HTTP Traffic Stream (RED Rate)</h3>
+              <span class="panel-badge">Live 5s Window</span>
+            </div>
+            <div class="chart-container">
+              <div class="bar-chart" id="traffic-bar-chart">
+                <!-- Dynamically generated bars -->
+              </div>
+            </div>
+            <div class="chart-legend">
+              <span class="legend-item"><span class="legend-color normal"></span> 2xx Success</span>
+              <span class="legend-item"><span class="legend-color error"></span> 5xx Errors</span>
+            </div>
+          </div>
+
+          <div class="panel gauges-panel">
+            <div class="panel-header">
+              <h3>System Resource Health</h3>
+            </div>
+            <div class="gauge-list">
+              <div class="gauge-item">
+                <div class="gauge-label">
+                  <span>Heap Memory Usage</span>
+                  <span id="gauge-memory-val">38 MB</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill" id="gauge-memory-bar" style="width: 25%;"></div>
+                </div>
+              </div>
+
+              <div class="gauge-item">
+                <div class="gauge-label">
+                  <span>Database Connection Pool</span>
+                  <span id="gauge-db-val">Healthy</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill fill-green" id="gauge-db-bar" style="width: 80%;"></div>
+                </div>
+              </div>
+
+              <div class="gauge-item">
+                <div class="gauge-label">
+                  <span>Prometheus Scrape Interval</span>
+                  <span>10s Active</span>
+                </div>
+                <div class="progress-bar">
+                  <div class="progress-fill fill-cyan" style="width: 100%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="quick-chaos-banner">
+              <p>Want to trigger Prometheus alert spikes?</p>
+              <button class="btn btn-warning btn-sm" id="btn-quick-spike">Trigger 50-Request Spike</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Monitored Microservices Quick View -->
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Cloud Infrastructure Topology</h3>
+            <button class="btn btn-secondary btn-sm" id="btn-refresh-services">Refresh</button>
+          </div>
+          <div class="service-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Service / Resource</th>
+                  <th>Type</th>
+                  <th>Region</th>
+                  <th>Latency</th>
+                  <th>Uptime</th>
+                  <th>Health Status</th>
+                </tr>
+              </thead>
+              <tbody id="overview-services-tbody">
+                <!-- Dynamic rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: CLOUD SERVICES -->
+      <section id="tab-services" class="tab-pane">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Managed Cloud Resources & Services</h3>
+              <p class="panel-desc">Manage distributed microservices, databases, and compute fleets stored in PostgreSQL.</p>
+            </div>
+            <button class="btn btn-primary btn-sm" id="btn-add-service-modal">+ Register Cloud Service</button>
+          </div>
+          <div class="service-table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Type</th>
+                  <th>Region</th>
+                  <th>Latency</th>
+                  <th>Uptime</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="full-services-tbody">
+                <!-- Populated via API -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: INCIDENT COMMAND -->
+      <section id="tab-incidents" class="tab-pane">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h3>Operational Incidents & SRE Command</h3>
+              <p class="panel-desc">Track and remediate production outages, alert triggers, and root cause analyses.</p>
+            </div>
+            <button class="btn btn-danger btn-sm" id="btn-create-incident-modal">+ Report Incident</button>
+          </div>
+          <div class="incidents-list" id="incidents-container">
+            <!-- Populated via API -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: CHAOS & TRAFFIC LAB -->
+      <section id="tab-chaos" class="tab-pane">
+        <div class="chaos-grid">
+          <div class="chaos-card">
+            <div class="chaos-header">
+              <span class="chaos-icon">🚀</span>
+              <h4>Synthetic HTTP Traffic</h4>
+            </div>
+            <p>Dispatches high-concurrency requests to test Prometheus counters and latency histograms.</p>
+            <div class="chaos-actions">
+              <button class="btn btn-primary" onclick="window.cloudPulse.simulateTraffic(25)">Send 25 Requests</button>
+              <button class="btn btn-outline" onclick="window.cloudPulse.simulateTraffic(100)">Send 100 Requests</button>
+            </div>
+          </div>
+
+          <div class="chaos-card">
+            <div class="chaos-header">
+              <span class="chaos-icon">💥</span>
+              <h4>Trigger 500 Server Error</h4>
+            </div>
+            <p>Injects an artificial 500 error to verify Grafana alert rules and error rate calculations.</p>
+            <div class="chaos-actions">
+              <button class="btn btn-danger" onclick="window.cloudPulse.simulateError()">Simulate 500 Error</button>
+            </div>
+          </div>
+
+          <div class="chaos-card">
+            <div class="chaos-header">
+              <span class="chaos-icon">🐢</span>
+              <h4>Simulate Slow DB Query</h4>
+            </div>
+            <p>Simulates an 850ms latency spike to exercise P95/P99 latency alerting thresholds.</p>
+            <div class="chaos-actions">
+              <button class="btn btn-warning" onclick="window.cloudPulse.simulateLatency()">Trigger 850ms Delay</button>
+            </div>
+          </div>
+
+          <div class="chaos-card">
+            <div class="chaos-header">
+              <span class="chaos-icon">🐒</span>
+              <h4>Chaos Monkey Injection</h4>
+            </div>
+            <p>Randomly injects network degradation, 503 errors, and intermittent faults.</p>
+            <div class="chaos-actions">
+              <button class="btn btn-secondary" onclick="window.cloudPulse.simulateChaos()">Run Chaos Injection</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Real-Time Activity Log Console -->
+        <div class="panel log-console-panel">
+          <div class="panel-header">
+            <h3>Live Telemetry & Chaos Event Log</h3>
+            <button class="btn btn-outline btn-xs" id="btn-clear-logs">Clear Log</button>
+          </div>
+          <div class="terminal-window" id="terminal-logs">
+            <div class="log-line info">[INIT] CloudPulse Observability Agent initialized and listening.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: CI/CD & ARCHITECTURE -->
+      <section id="tab-cicd" class="tab-pane">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Automated CI/CD Pipeline (GitHub Actions)</h3>
+            <span class="badge badge-success">Passing</span>
+          </div>
+          <div class="pipeline-flow">
+            <div class="stage-card done">
+              <div class="stage-num">1</div>
+              <div class="stage-info">
+                <strong>Lint & Format</strong>
+                <span>ESLint & Syntax checks</span>
+              </div>
+            </div>
+            <div class="stage-arrow">➔</div>
+
+            <div class="stage-card done">
+              <div class="stage-num">2</div>
+              <div class="stage-info">
+                <strong>Automated Tests</strong>
+                <span>Jest Unit & Supertest API</span>
+              </div>
+            </div>
+            <div class="stage-arrow">➔</div>
+
+            <div class="stage-card done">
+              <div class="stage-num">3</div>
+              <div class="stage-info">
+                <strong>Security Audit</strong>
+                <span>Trivy & npm audit</span>
+              </div>
+            </div>
+            <div class="stage-arrow">➔</div>
+
+            <div class="stage-card done">
+              <div class="stage-num">4</div>
+              <div class="stage-info">
+                <strong>Docker Build</strong>
+                <span>Multi-stage Alpine Image</span>
+              </div>
+            </div>
+            <div class="stage-arrow">➔</div>
+
+            <div class="stage-card done">
+              <div class="stage-num">5</div>
+              <div class="stage-info">
+                <strong>Registry Push</strong>
+                <span>GHCR / Docker Hub</span>
+              </div>
+            </div>
+            <div class="stage-arrow">➔</div>
+
+            <div class="stage-card active">
+              <div class="stage-num">6</div>
+              <div class="stage-info">
+                <strong>Deploy to Cloud</strong>
+                <span>Render / Railway Live</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Infrastructure Topology Details -->
+        <div class="infra-grid">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Container & Multi-Service Specs</h3>
+            </div>
+            <div class="spec-list">
+              <div class="spec-item">
+                <span class="spec-label">Web Application</span>
+                <span class="spec-val">Node.js 20 LTS Alpine (Non-root, Tini PID 1)</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-label">Database</span>
+                <span class="spec-val">PostgreSQL 16 with Connection Pooling</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-label">Metrics Engine</span>
+                <span class="spec-val">Prometheus v2.50 (10s scrape interval)</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-label">Visualization</span>
+                <span class="spec-val">Grafana v10 with pre-provisioned dashboards</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-label">Infrastructure as Code</span>
+                <span class="spec-val">Terraform (AWS ECS, RDS, VPC) + render.yaml</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Observability & Telemetry Endpoints</h3>
+            </div>
+            <div class="endpoint-list">
+              <div class="endpoint-row">
+                <span class="method get">GET</span>
+                <code>/metrics</code>
+                <span class="desc">Prometheus Exposition Standard</span>
+              </div>
+              <div class="endpoint-row">
+                <span class="method get">GET</span>
+                <code>/health</code>
+                <span class="desc">Kubernetes Liveness Probe</span>
+              </div>
+              <div class="endpoint-row">
+                <span class="method get">GET</span>
+                <code>/ready</code>
+                <span class="desc">Database & Dependency Readiness Probe</span>
+              </div>
+              <div class="endpoint-row">
+                <span class="method post">POST</span>
+                <code>/api/v1/auth/login</code>
+                <span class="desc">JWT Token Issuance</span>
+              </div>
+              <div class="endpoint-row">
+                <span class="method get">GET</span>
+                <code>/api/v1/services</code>
+                <span class="desc">Managed Cloud Resources List</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- AUTH MODAL -->
+  <div class="modal-overlay hidden" id="login-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>DevOps Authentication & RBAC</h3>
+        <button class="modal-close" id="btn-close-modal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-sub">Log in with pre-seeded demo credentials or your own account.</p>
+        
+        <div class="demo-credential-box">
+          <strong>Demo Admin Account:</strong>
+          <code>admin@cloudpulse.io</code> / <code>Admin@DevOps2026!</code>
+          <button class="btn btn-xs btn-outline" id="btn-autofill-demo">Auto-Fill</button>
+        </div>
+
+        <form id="form-login">
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="login-email" required placeholder="admin@cloudpulse.io">
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="login-password" required placeholder="••••••••••••">
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREATE SERVICE MODAL -->
+  <div class="modal-overlay hidden" id="service-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Register Cloud Service / Resource</h3>
+        <button class="modal-close" onclick="window.cloudPulse.closeModals()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-service">
+          <div class="form-group">
+            <label>Service Name</label>
+            <input type="text" id="service-name" required placeholder="e.g. Auth Microservice, Redis Cache">
+          </div>
+          <div class="form-group">
+            <label>Service Type</label>
+            <select id="service-type" required>
+              <option value="api-gateway">API Gateway</option>
+              <option value="microservice">Microservice (Node/Go/Python)</option>
+              <option value="database">PostgreSQL / Database</option>
+              <option value="cache">Redis Cache Fleet</option>
+              <option value="compute">Kubernetes Cluster (EKS)</option>
+              <option value="cdn">CDN / Edge Network</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Cloud Region</label>
+            <select id="service-region" required>
+              <option value="us-east-1">US-East (N. Virginia)</option>
+              <option value="us-west-2">US-West (Oregon)</option>
+              <option value="eu-central-1">EU-Central (Frankfurt)</option>
+              <option value="ap-south-1">AP-South (Mumbai)</option>
+              <option value="global">Global (Multi-Region CDN)</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Register Resource</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPORT INCIDENT MODAL -->
+  <div class="modal-overlay hidden" id="incident-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Report Operational Incident</h3>
+        <button class="modal-close" onclick="window.cloudPulse.closeModals()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-incident">
+          <div class="form-group">
+            <label>Incident Summary</label>
+            <input type="text" id="incident-title" required placeholder="e.g. Memory saturation on worker node #4">
+          </div>
+          <div class="form-group">
+            <label>Affected Service</label>
+            <input type="text" id="incident-service" required placeholder="e.g. API Gateway (US-East)">
+          </div>
+          <div class="form-group">
+            <label>Severity</label>
+            <select id="incident-severity" required>
+              <option value="LOW">LOW - Minimal Impact</option>
+              <option value="MEDIUM">MEDIUM - Degraded Latency</option>
+              <option value="HIGH">HIGH - Partial Outage / 5xx Spike</option>
+              <option value="CRITICAL">CRITICAL - System-wide Outage</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Initial Root Cause Hypothesis</label>
+            <textarea id="incident-cause" rows="3" placeholder="Telemetry indicates sudden load spike exceeding auto-scaler threshold."></textarea>
+          </div>
+          <button type="submit" class="btn btn-danger btn-block">Trigger Incident Alert</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
